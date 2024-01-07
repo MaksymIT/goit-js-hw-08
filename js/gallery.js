@@ -65,4 +65,60 @@ const images = [
 ];
 
 
-document.createElement
+// Вибираємо елемент галереї та створюємо розмітку
+const galleryList = document.querySelector(".gallery");
+const markup = createMarkup(images);
+galleryList.insertAdjacentHTML("beforeend", markup);
+
+// Додаємо прослуховувач події кліка на елементах галереї
+galleryList.addEventListener("click", handleClick);
+
+// Функція для створення розмітки зображень
+function createMarkup(images) {
+    return images
+        .map(({ preview, original, description }) => {
+            return `<li class="gallery__item">
+                <a class="gallery__link" href="${original}">
+                    <img
+                        class="gallery__image"
+                        src="${preview}"
+                        data-source="${original}"
+                        alt="${description}"
+                    />
+                </a>
+            </li>`;
+        })
+        .join("");
+}
+
+// Функція, яка викликається при кліку на зображення
+function handleClick(event) {
+    event.preventDefault();
+    if (event.target.nodeName !== "IMG") {
+        return console.log(event.target.dataset.source);
+    }
+
+    // Створюємо екземпляр basicLightbox для відображення зображення в модальному вікні
+    const lightboxInstance = basicLightbox.create(`
+        <img src="${event.target.dataset.source}" alt="${event.target.alt}"/>
+    `, {
+        // Додаємо прослуховувач клавіатури для закриття за допомогою клавіші "Escape"
+        onShow: () => {
+            document.addEventListener("keydown", onEscPress);
+        },
+        // Видаляємо прослуховувач клавіатури після закриття модального вікна
+        onClose: () => {
+            document.removeEventListener("keydown", onEscPress);
+        }
+    });
+
+    // Відкриваємо модальне вікно
+    lightboxInstance.show();
+
+    // Функція для закриття модального вікна при натисканні клавіші "Escape"
+    function onEscPress(event) {
+        if (event.code === "Escape") {
+            lightboxInstance.close();
+        }
+    }
+}
